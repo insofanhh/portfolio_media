@@ -68,4 +68,4 @@ Nếu chạy integration nhiều lần trên local trong cùng giờ, dùng `npm
 
 ## Đưa lên cloud sau
 
-Xem [hướng dẫn triển khai](docs/deployment.md), [vận hành](docs/operations.md) và `.env.example`. Đã chuẩn bị CI, migrations, worker Docker và bộ kiểm tra cấu hình. Chưa tạo repo GitHub, chưa provision Vercel/Blob/TiDB/Cloud Run và chưa chạy kiểm thử cloud vì chưa có tài khoản. Không cần nhập khóa cloud để xem bản local.
+Mã nguồn được quản lý tại [GitHub — insofanhh/portfolio_media](https://github.com/insofanhh/portfolio_media), nhánh `main`. Xem [hướng dẫn triển khai](docs/deployment.md), [vận hành](docs/operations.md) và `.env.example`. Đã chuẩn bị CI, migrations, worker Docker và bộ kiểm tra cấu hình. Chưa provision Vercel/Blob/TiDB/Cloud Run và chưa chạy kiểm thử cloud. Không cần nhập khóa cloud để xem bản local.
