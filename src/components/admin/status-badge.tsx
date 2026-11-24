@@ -1,0 +1,2 @@
+const labels: Record<string, string> = { READY: "Sẵn sàng", UPLOADING: "Đang upload", QUEUED: "Trong hàng đợi", PROCESSING: "Đang xử lý", FAILED: "Cần kiểm tra", DELETING: "Thùng rác", DRAFT: "Bản nháp", PUBLISHED: "Đã xuất bản", ARCHIVED: "Đã lưu trữ", PUBLISHING: "Đang xuất bản", NEW: "Mới", READ: "Đã xem", DONE: "Hoàn tất" };
+export function StatusBadge({ status }: { status: string }) { return <span className={`status-badge status-${status.toLowerCase()}`}>{labels[status] || status}</span>; }

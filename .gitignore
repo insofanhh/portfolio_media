@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.local/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+coverage/
+test-results/
+playwright-report/
+.vercel/
+design/*-qa*.html
+design/portfolio-qa*.html
+*.log

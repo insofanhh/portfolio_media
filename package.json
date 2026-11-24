@@ -1,0 +1,58 @@
+{
+  "name": "luminous-frame-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n web,media \"next dev --webpack --hostname 127.0.0.1\" \"tsx watch worker/index.ts\"",
+    "dev:web": "next dev --webpack --hostname 127.0.0.1",
+    "build": "prisma generate && next build --webpack",
+    "start": "next start --hostname 127.0.0.1",
+    "lint": "eslint src worker scripts tests",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "test:integration": "tsx scripts/smoke.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "tsx scripts/seed.ts",
+    "admin:create": "tsx scripts/create-admin.ts",
+    "check:production": "tsx scripts/check-production.ts",
+    "worker": "tsx worker/index.ts",
+    "worker:once": "tsx worker/index.ts --once",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@fontsource/be-vietnam-pro": "5.3.0",
+    "@prisma/client": "6.19.3",
+    "@vercel/blob": "2.9.0",
+    "dotenv": "^17.2.3",
+    "google-auth-library": "^10.5.0",
+    "hls.js": "^1.6.15",
+    "lucide-react": "^0.577.0",
+    "next": "16.4.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "sharp": "0.35.5",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "16.4.6",
+    "prisma": "6.19.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "@prisma/config": {
+      "deepmerge-ts": "8.0.2",
+      "effect": "3.22.5"
+    },
+    "@vercel/cli-config": "0.4.0"
+  }
+}

@@ -1,0 +1,52 @@
+name: Portfolio checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only-root-password
+          MYSQL_DATABASE: portfolio_media
+          MYSQL_USER: portfolio
+          MYSQL_PASSWORD: ci-only-database-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci-only-root-password"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      DATABASE_URL: mysql://portfolio:ci-only-database-password@127.0.0.1:3306/portfolio_media?connection_limit=5
+      APP_URL: http://127.0.0.1:3000
+      WORKER_SECRET: ci-only-worker-secret-for-disposable-fixtures
+      ADMIN_EMAIL: ci@example.invalid
+      ADMIN_PASSWORD: ci-only-admin-password-for-disposable-db
+      STORAGE_DRIVER: local
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: npm ci
+      - run: npm run db:migrate
+      - run: npm run admin:create
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Integration with web and worker
+        run: |
+          npm start > /tmp/portfolio-web.log 2>&1 &
+          npm run worker > /tmp/portfolio-worker.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/ > /dev/null; then break; fi
+            sleep 1
+          done
+          npm run test:integration

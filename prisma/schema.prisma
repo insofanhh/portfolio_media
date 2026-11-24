@@ -1,0 +1,222 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProjectType {
+  PHOTO
+  VIDEO
+  MIXED
+}
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+enum PublicationState {
+  IDLE
+  QUEUED
+  PUBLISHING
+  FAILED
+}
+enum MediaStatus {
+  UPLOADING
+  QUEUED
+  PROCESSING
+  READY
+  FAILED
+  DELETING
+}
+enum Placement {
+  MAIN
+  BEHIND_THE_SCENES
+}
+enum JobType {
+  PROCESS_MEDIA
+  PUBLISH_PROJECT
+  UNPUBLISH_PROJECT
+  DELETE_MEDIA
+}
+enum JobStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  sessions     Session[]
+  createdAt    DateTime  @default(now())
+}
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([expiresAt])
+}
+model Project {
+  id                String           @id @default(cuid())
+  slug              String           @unique
+  title             String
+  type              ProjectType
+  status            ProjectStatus    @default(DRAFT)
+  publicationState  PublicationState @default(IDLE)
+  publicationError  String?          @db.Text
+  revision          Int              @default(0)
+  publishedRevision Int?
+  summary           String           @db.Text
+  concept           String           @db.Text
+  scope             String           @db.Text
+  role              String
+  client            String           @default("")
+  year              Int
+  credits           String           @db.Text
+  tags              Json
+  featuredOrder     Int              @default(0)
+  coverMediaId      String?
+  seoTitle          String           @default("")
+  seoDescription    String           @default("")
+  publicSnapshot    Json?
+  isDemo            Boolean          @default(false)
+  publishedAt       DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  media             ProjectMedia[]
+  publicReferences  PublicMediaReference[]
+  jobs              ProcessingJob[]
+  @@index([status, featuredOrder])
+  @@index([status, publishedAt])
+}
+model Media {
+  id           String             @id @default(cuid())
+  originalName String
+  sourceKey    String             @db.Text
+  mime         String
+  bytes        BigInt             @default(0)
+  width        Int?
+  height       Int?
+  duration     Float?
+  checksum     String?
+  status       MediaStatus        @default(UPLOADING)
+  error        String?            @db.Text
+  version      Int                @default(1)
+  deleteAfter  DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  variants     MediaVariant[]
+  projects     ProjectMedia[]
+  publicReferences PublicMediaReference[]
+  jobs         ProcessingJob[]
+  upload       UploadSession?
+  @@index([status, createdAt])
+}
+model MediaVariant {
+  id         String @id @default(cuid())
+  mediaId    String
+  media      Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  kind       String
+  name       String
+  storageKey String @db.Text
+  publicKey  String? @db.Text
+  mime       String
+  bytes      BigInt
+  width      Int?
+  height     Int?
+  @@unique([mediaId, name])
+  @@index([mediaId, kind])
+}
+model ProjectMedia {
+  id        String    @id @default(cuid())
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  mediaId   String
+  media     Media     @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+  placement Placement
+  sortOrder Int       @default(0)
+  alt       String    @default("")
+  caption   String    @default("")
+  focalX    Float     @default(0.5)
+  focalY    Float     @default(0.5)
+  @@unique([projectId, mediaId, placement])
+  @@index([projectId, placement, sortOrder])
+}
+model PublicMediaReference {
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  mediaId   String
+  media     Media   @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+  @@id([projectId, mediaId])
+  @@index([mediaId])
+}
+model UploadSession {
+  id        String   @id @default(cuid())
+  mediaId   String   @unique
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  userId    String
+  path      String
+  maxBytes  BigInt
+  expiresAt DateTime
+  completedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([expiresAt])
+}
+model ProcessingJob {
+  id        String    @id @default(cuid())
+  type      JobType
+  mediaId   String?
+  media     Media?    @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  projectId String?
+  project   Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  revision  Int       @default(0)
+  payload   Json?
+  status    JobStatus @default(PENDING)
+  attempts  Int       @default(0)
+  maxAttempts Int     @default(4)
+  runAt     DateTime  @default(now())
+  leaseUntil DateTime?
+  error     String?   @db.Text
+  createdAt DateTime  @default(now())
+  finishedAt DateTime?
+  @@index([status, runAt])
+  @@index([status, leaseUntil])
+}
+model Inquiry {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  projectType String
+  brief       String   @db.Text
+  status      String   @default("NEW")
+  createdAt   DateTime @default(now())
+  @@index([status, createdAt])
+}
+model SiteSettings {
+  id        String   @id @default("site")
+  data      Json
+  updatedAt DateTime @updatedAt
+}
+model RateLimit {
+  key       String   @id
+  count     Int      @default(1)
+  expiresAt DateTime
+  @@index([expiresAt])
+}
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  targetId  String
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+}
