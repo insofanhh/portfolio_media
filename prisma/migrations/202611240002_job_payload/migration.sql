@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE `processingjob` ADD COLUMN `payload` JSON NULL;
+ALTER TABLE `ProcessingJob` ADD COLUMN `payload` JSON NULL;

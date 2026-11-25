@@ -15,3 +15,9 @@ Chưa kiểm thử: tài khoản Blob/TiDB/Cloud Run/Vercel thật, CI trên Git
 ## Cập nhật 25/11/2026 — phát video trong film slider
 
 Slider trang chủ và danh sách video giờ tự phát thẻ giữa khi đủ 50% trong viewport (muted, loop, playsInline), hoặc bấm Play. Nút phát/dừng và âm thanh tách khỏi link chi tiết. Kiểm tra bằng browser: `paused=false`, `currentTime` tăng, bật tiếng, chuyển thẻ chỉ còn một video, nguồn chưa được gán khi slider nằm ngoài viewport lúc tải trang, dừng ngoài vùng xem và khi mở modal, giữ Pause thủ công sau khi cuộn trở lại. Mobile 390 × 844 và 320 × 740 không tràn ngang và hai nút điều khiển không chồng nhau. ESLint, TypeScript và production build được kiểm tra lại. Cần kiểm thử bổ sung autoplay policy/reduced motion/Data Saver trên trình duyệt thực tế và luồng HLS dài trong slider; các demo dùng MP4.
+
+## Cập nhật 25/11/2026 — production và migration Linux
+
+TiDB strict TLS và hai migrations đã chạy thành công; 5 dự án, 10 media, 38 variants và admin đã được copy vào database `portfolio`. Snapshot dùng public Blob; video range HTTP 206, ảnh HTTP 200, original private không xác thực HTTP 403. Production Vercel dùng Node 24, function region `sin1`.
+
+GitHub Actions phát hiện migration `202611240002_job_payload` dùng tên bảng `processingjob`, khác `ProcessingJob` trong migration khởi tạo; MySQL Linux phân biệt viết hoa nên lỗi 1146. Đã sửa đúng casing. Trên hai database local/production đã áp dụng bản cũ, đã xác minh `payload` tồn tại, kiểu JSON, nullable, migration hoàn tất và checksum đúng bản cũ trước khi đồng bộ checksum với SQL đã sửa. Không chạy lại ALTER, không thay đổi dữ liệu hoặc schema trên các DB đó. Những DB cài mới dùng tên bảng đúng ngay từ đầu.
