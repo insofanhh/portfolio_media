@@ -1,0 +1,22 @@
+/* Isolate moving/filtered artwork from the static introduction. In particular,
+   avoid filtering a parent containing all crossfading slides on mobile WebKit. */
+.hero-with-slider{--hero-backdrop-opacity:.7;overflow:hidden}
+.hero-with-slider .hero-backdrop{
+  inset:0;z-index:0;overflow:hidden;contain:paint;isolation:isolate;
+  filter:none;opacity:1;transform:none;
+}
+.hero-with-slider .hero-backdrop-slide{inset:-60px}
+.hero-with-slider .hero-backdrop-slide>img{
+  filter:blur(38px);opacity:var(--hero-backdrop-opacity);transform:scale(1.12);
+}
+.hero-with-slider .hero-wash{z-index:1}
+.hero-with-slider .hero-copy{
+  position:relative;z-index:2;isolation:isolate;
+  /* Give static text its own composited surface, separate from the blur fade. */
+  transform:translateZ(0);-webkit-backface-visibility:hidden;backface-visibility:hidden;
+}
+.hero-with-slider .hero-media{z-index:2}
+@media(max-width:650px){.hero-with-slider{--hero-backdrop-opacity:.5}}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+  .hero-with-slider .hero-backdrop{display:none}
+}
