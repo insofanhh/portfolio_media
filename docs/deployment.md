@@ -9,7 +9,8 @@
 - Blob region `sin1`: `portfolio-media-originals` (private, prefix `BLOB`) và `portfolio-media-published` (public, prefix `BLOB_PUBLIC`), chỉ nối môi trường production. Hai token riêng tương ứng `BLOB_READ_WRITE_TOKEN` và `BLOB_PUBLIC_READ_WRITE_TOKEN`.
 - File cấu hình bí mật local: `.local/production.env` (đã ignore, không commit). Database TiDB `portfolio` đã kết nối bằng strict TLS; hai migration đã áp dụng. Đã chuyển 5 dự án, 10 media, 38 variants, một tài khoản admin và cấu hình site từ local; không chuyển sessions, jobs hay rate limits.
 - 86 Blob objects đã được copy: original/derivatives ở private, chỉ derivatives của dự án xuất bản ở public. Kiểm tra ảnh public HTTP 200, video range HTTP 206, original không có xác thực HTTP 403. Snapshot dùng URL Blob production, không còn đường dẫn media localhost.
-- `DATABASE_URL`, `APP_URL=https://portfolio-media-five.vercel.app`, hai Blob tokens và worker secret đã cấu hình trên Vercel production. Còn thiếu Google Cloud project và service account để kích hoạt xử lý upload mới. Xem [hướng dẫn tạo Google Cloud project](google-cloud-setup.md). Các route upload/publish sẽ báo chưa cấu hình worker cho đến khi hoàn tất bước này.
+- Production URL: [anhhv-media-portfolio.vercel.app](https://anhhv-media-portfolio.vercel.app). Domain cũ `portfolio-media-five.vercel.app` chuyển hướng 308 sang domain mới.
+- `DATABASE_URL`, `APP_URL=https://anhhv-media-portfolio.vercel.app`, hai Blob tokens và worker secret đã cấu hình trên Vercel production. Còn thiếu Google Cloud project và service account để kích hoạt xử lý upload mới. Xem [hướng dẫn tạo Google Cloud project](google-cloud-setup.md). Các route upload/publish sẽ báo chưa cấu hình worker cho đến khi hoàn tất bước này.
 
 ## 1. GitHub và môi trường
 
