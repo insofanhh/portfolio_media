@@ -4,7 +4,7 @@ Portfolio Next.js triển khai theo [layout V3](docs/layout-revision-v3.md) và 
 
 ## Chạy local
 
-Yêu cầu Node.js 22+ (đã kiểm thử Node 24), MySQL 8, FFmpeg và FFprobe có trong PATH.
+Yêu cầu Node.js 24, MySQL 8, FFmpeg và FFprobe có trong PATH. Bản triển khai Vercel cũng được cố định ở Node 24.
 
 ```powershell
 cd C:\laragon\www\Portfolio_media

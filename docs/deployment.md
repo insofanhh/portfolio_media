@@ -2,6 +2,15 @@
 
 Đây là cấu hình triển khai chuẩn bị sẵn; cần tạo tài khoản và kiểm thử staging trước khi sử dụng production. Không giả định các dịch vụ nằm trong gói miễn phí. Web ở Vercel; encode bằng worker container riêng (Cloud Run Job). Các lệnh tạo dịch vụ chỉ thực hiện sau khi chọn project, region và ngân sách.
 
+## Trạng thái kết nối — 25/11/2026
+
+- Repository: `insofanhh/portfolio_media`, nhánh production `main`.
+- Vercel project: [portfolio-media](https://vercel.com/insofanhs-projects-e7977654/portfolio-media), đã nối GitHub; Next.js và Node 24. `vercel.json` dùng `npm ci` / `npm run build`; `.vercelignore` loại secrets, DB/upload local, build local và bản thiết kế khỏi gói deploy.
+- Blob region `sin1`: `portfolio-media-originals` (private, prefix `BLOB`) và `portfolio-media-published` (public, prefix `BLOB_PUBLIC`), chỉ nối môi trường production. Hai token riêng tương ứng `BLOB_READ_WRITE_TOKEN` và `BLOB_PUBLIC_READ_WRITE_TOKEN`.
+- File cấu hình bí mật local: `.local/production.env` (đã ignore, không commit). Database TiDB `portfolio` đã kết nối bằng strict TLS; hai migration đã áp dụng. Đã chuyển 5 dự án, 10 media, 38 variants, một tài khoản admin và cấu hình site từ local; không chuyển sessions, jobs hay rate limits.
+- 86 Blob objects đã được copy: original/derivatives ở private, chỉ derivatives của dự án xuất bản ở public. Kiểm tra ảnh public HTTP 200, video range HTTP 206, original không có xác thực HTTP 403. Snapshot dùng URL Blob production, không còn đường dẫn media localhost.
+- `DATABASE_URL`, `APP_URL=https://portfolio-media-five.vercel.app`, hai Blob tokens và worker secret đã cấu hình trên Vercel production. Còn thiếu Google Cloud project và service account để kích hoạt xử lý upload mới. Xem [hướng dẫn tạo Google Cloud project](google-cloud-setup.md). Các route upload/publish sẽ báo chưa cấu hình worker cho đến khi hoàn tất bước này.
+
 ## 1. GitHub và môi trường
 
 Tạo repository trống rồi thêm remote thật và push nhánh local. `.env`, `.local`, upload, DB, build và `node_modules` đã được ignore. CI trong `.github/workflows/ci.yml` chạy MySQL tạm, lint/type/unit/integration/build. Không có secrets production trong workflow.
@@ -10,7 +19,7 @@ Tách staging/production: mỗi môi trường có DB, hai Blob stores, worker j
 
 ## 2. TiDB
 
-Tạo database, tài khoản app với quyền CRUD và tài khoản migration riêng với DDL. Chọn region gần web/worker. Trong Connect → Prisma, lấy URL MySQL, URL-encode password và bật TLS `sslaccept=strict`; chỉ định CA tin cậy qua `sslcert` theo hướng dẫn của cluster và vị trí file thực tế ở môi trường triển khai. Không dùng `accept_invalid_certs`. Dùng pool nhỏ ban đầu (`connection_limit=3`, `pool_timeout=20`), sau đó kiểm tra concurrency theo hạn mức cluster. [Hướng dẫn Prisma của TiDB](https://docs.pingcap.com/developer/dev-guide-sample-application-nodejs-prisma/).
+Tạo database, tài khoản app với quyền CRUD và tài khoản migration riêng với DDL. Chọn region gần web/worker. Trong Connect → Prisma, lấy URL MySQL, URL-encode password và bật TLS `sslaccept=strict`; dùng trust store hệ thống hoặc chỉ định CA tin cậy qua `sslcert` nếu cluster cần CA riêng. Kết nối TiDB hiện tại đã xác minh strict TLS với cipher `TLS_AES_128_GCM_SHA256`, không cần CA tùy chỉnh. Không dùng `accept_invalid_certs`. Dùng pool nhỏ ban đầu (`connection_limit=3`, `pool_timeout=20`), sau đó kiểm tra concurrency theo hạn mức cluster. [Hướng dẫn Prisma của TiDB](https://docs.pingcap.com/developer/dev-guide-sample-application-nodejs-prisma/).
 
 ```dotenv
 DATABASE_URL="mysql://USER:URL_ENCODED_PASSWORD@HOST:4000/portfolio_media?sslaccept=strict&sslcert=ABSOLUTE_CA_PATH&connection_limit=3&pool_timeout=20"
@@ -18,7 +27,7 @@ DATABASE_URL="mysql://USER:URL_ENCODED_PASSWORD@HOST:4000/portfolio_media?sslacc
 
 Trên worker Debian có thể dùng CA bundle hệ thống nếu chuỗi chứng chỉ cluster được bundle đó tin cậy; nếu cluster cấp CA riêng, mount đúng CA riêng. Trên Vercel, thêm CA công khai vào `prisma/certs/`, bật `outputFileTracingIncludes` cho file này trong `next.config.ts` và đặt `sslcert` trỏ tới file đã được bundle ở runtime. Kiểm tra cả build và runtime đọc được file; chứng chỉ CA phải được lấy từ nhà cung cấp, không tự tạo chứng chỉ thay thế.
 
-Chạy `npm run db:migrate` từ máy/runner đáng tin với URL của tài khoản migration. Không dùng `migrate dev` hay reset DB trên production. Migrations hiện đã kiểm thử MySQL 8; **chưa xác nhận trên TiDB**. Chạy nguyên migrations, auth, upload, publish/unpublish và truy vấn trên TiDB staging trước. Sau đó cấp URL tài khoản app cho web/worker.
+Chạy `npm run db:migrate` từ máy/runner đáng tin với URL của tài khoản migration. Không dùng `migrate dev` hay reset DB trên production. Hai migrations đã chạy thành công trên TiDB 8.5.3 Serverless ngày 25/11/2026. Tiếp tục nghiệm thu auth, upload, publish/unpublish trên staging khi worker sẵn sàng.
 
 ## 3. Hai Blob stores
 
