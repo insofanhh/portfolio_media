@@ -2,12 +2,13 @@
 
 import { useEffect, useReducer, useRef, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { ArrowUpRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
-import type { PublicProject } from "@/lib/types";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import type { PublicMedia, PublicProject } from "@/lib/types";
 import { formatDuration } from "@/lib/utils";
 import { MediaImage } from "./media-image";
+import { FilmCardVideo } from "./film-card-video";
 
-type FilmSlide = Pick<PublicProject, "id" | "slug" | "title" | "role" | "client" | "year" | "tags" | "cover">;
+type FilmSlide = Pick<PublicProject, "id" | "slug" | "title" | "role" | "client" | "year" | "tags" | "cover"> & { video: PublicMedia | null };
 type SliderState = { active: number; previous: number | null };
 type Action = { type: "step"; delta: number } | { type: "select" | "project"; index: number } | { type: "settled"; previous: number };
 const largeScreenQuery = "(min-width: 1200px)";
@@ -56,7 +57,7 @@ export function FilmSlider({ projects }: { projects: FilmSlide[] }) {
   function step(delta: number) { dispatch({ type: "step", delta }); }
 
   return <section className={`film-grid film-slider ${count === 1 ? "film-slider-single" : ""}`} role="region" aria-roledescription="carousel" aria-label="Slider dự án video" onKeyDown={event => {
-    if (event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); step(event.key === "ArrowLeft" ? -1 : 1); }
+    if (!event.altKey && !event.ctrlKey && !event.metaKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) { event.preventDefault(); step(event.key === "ArrowLeft" ? -1 : 1); }
   }} onPointerDown={event => {
     cancelClick.current = false;
     if (event.pointerType !== "mouse") gesture.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
@@ -81,10 +82,11 @@ export function FilmSlider({ projects }: { projects: FilmSlide[] }) {
         const visible = Math.abs(offset) <= (largeScreen ? 2 : 1);
         return <article key={`${project.id}-${index}`} className="film-slider-card" data-position={position} role="group" aria-roledescription="slide" aria-label={`${projectIndex + 1} / ${count}: ${project.title}`} aria-hidden={!visible} inert={!visible}>
           <div className="film-card-poster">{visible && <MediaImage media={project.cover} sizes="(max-width: 650px) 56vw, 300px" />}<div className="film-card-shade" /></div>
+          {selected && project.video && <FilmCardVideo key={project.video.id} media={project.video} title={project.title} />}
           {selected ? <Link className="film-card-link" href={`/work/${project.slug}`} aria-label={`Xem phim ${project.title}`} draggable={false}>
-            <span className="film-card-category">{project.tags[0] || "PRODUCT FILM"}</span><span className="film-card-play"><Play size={18} fill="currentColor" /></span>
+            <span className="film-card-category">{project.tags[0] || "PRODUCT FILM"}</span>
             <div className="film-card-caption" key={project.id}><h3>{project.title.split("—")[0].trim()}</h3><p className="film-card-subtitle">— {project.client || "PRODUCT FILM"} / {project.year}</p><span className="film-card-rule" /><p className="film-card-role">{project.role}</p><span className="film-card-cta">Xem dự án <ArrowUpRight size={14} /></span></div>
-            <span className="film-card-duration">{formatDuration(project.cover.duration) || "9:16"}</span>
+            <span className="film-card-duration">{formatDuration(project.video?.duration || project.cover.duration) || "9:16"}</span>
           </Link> : visible ? <button className="film-card-select" type="button" onClick={() => dispatch({ type: "select", index })} aria-label={`Đưa ${project.title} vào giữa${offset === -2 ? " (trái ngoài)" : offset === 2 ? " (phải ngoài)" : ""}`} tabIndex={0} /> : null}
         </article>;
       })}

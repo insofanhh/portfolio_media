@@ -11,3 +11,7 @@ Môi trường: Windows, Node 24.20.0, Next 16.4.6 Webpack, Prisma 6.19.3, MySQL
 Ảnh giao diện: [trang chủ](screenshots/home-desktop.jpg), [chi tiết desktop](screenshots/project-desktop.jpg), [chi tiết mobile](screenshots/project-mobile.jpg).
 
 Chưa kiểm thử: tài khoản Blob/TiDB/Cloud Run/Vercel thật, CI trên GitHub, Docker build trên máy này, Safari/iOS thật, video HDR thực tế, tải đồng thời production, Core Web Vitals và hóa đơn cloud. Các mục này cần nghiệm thu staging theo deployment.md. Hình/video hiện là dữ liệu minh họa.
+
+## Cập nhật 25/11/2026 — phát video trong film slider
+
+Slider trang chủ và danh sách video giờ tự phát thẻ giữa khi đủ 50% trong viewport (muted, loop, playsInline), hoặc bấm Play. Nút phát/dừng và âm thanh tách khỏi link chi tiết. Kiểm tra bằng browser: `paused=false`, `currentTime` tăng, bật tiếng, chuyển thẻ chỉ còn một video, nguồn chưa được gán khi slider nằm ngoài viewport lúc tải trang, dừng ngoài vùng xem và khi mở modal, giữ Pause thủ công sau khi cuộn trở lại. Mobile 390 × 844 và 320 × 740 không tràn ngang và hai nút điều khiển không chồng nhau. ESLint, TypeScript và production build được kiểm tra lại. Cần kiểm thử bổ sung autoplay policy/reduced motion/Data Saver trên trình duyệt thực tế và luồng HLS dài trong slider; các demo dùng MP4.

@@ -6,6 +6,7 @@ import "@fontsource/be-vietnam-pro/700.css";
 import "./globals.css";
 import "./liquid-glass.css";
 import "./film-slider.css";
+import "./photo-accordion.css";
 import { LiquidGlassLighting } from "@/components/liquid-glass-lighting";
 import { appUrl } from "@/lib/env";
 

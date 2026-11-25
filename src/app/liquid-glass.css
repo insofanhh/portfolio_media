@@ -1,4 +1,4 @@
-/* FRAME glass: optical edges and small floating controls; artwork stays unfiltered. */
+/* FRAME glass: translucent section materials and optical controls; artwork stays unfiltered. */
 :root{
   --glass-fill:rgba(250,248,255,.72);
   --glass-blur:18px;
@@ -7,7 +7,57 @@
   --glass-ink:#50405f;
   --glass-shadow:0 10px 28px rgba(71,47,94,.09),0 2px 5px rgba(71,47,94,.05),inset 0 1px 0 rgba(255,255,255,.96),inset 0 -1px 0 rgba(102,73,128,.1);
   --glass-highlight:rgba(255,255,255,.48);
+  --section-glass-fill:rgba(253,251,255,.36);
+  --section-glass-blur:20px;
 }
+
+/* A visible, static backdrop gives the large panes something to transmit.
+   Scope ambient color to the public site; no additional image requests or animation. */
+body:has(>.site-shell){
+  background-color:#e9e6f0;
+  background-image:
+    radial-gradient(ellipse 470px 390px at 2% 590px,rgba(173,143,215,.52),transparent),
+    radial-gradient(ellipse 480px 350px at 97% 980px,rgba(151,188,181,.42),transparent),
+    radial-gradient(ellipse 400px 310px at 27% 1360px,rgba(222,181,177,.32),transparent),
+    radial-gradient(ellipse 640px 350px at 75% 100px,rgba(199,182,227,.5),transparent);
+  background-size:100% 1700px;
+  background-repeat:repeat-y;
+}
+
+/* Keep blur on the material pseudo-element, never on the content or modal ancestor.
+   Static highlights make an optical rim without tracking the pointer across large areas. */
+.site-shell :is(.panel-section,.photo-section,.backstage-section,.about-section,.process-section,.contact-section){
+  position:relative;
+  isolation:isolate;
+  background:transparent;
+  border:1px solid rgba(255,255,255,.76);
+  border-radius:var(--radius);
+  box-shadow:0 14px 38px rgba(64,42,88,.07),0 2px 5px rgba(64,42,88,.035);
+}
+.site-shell :is(.panel-section,.photo-section,.backstage-section,.about-section,.process-section,.contact-section)::before{
+  content:"";
+  position:absolute;inset:0;z-index:-1;
+  border-radius:inherit;pointer-events:none;
+  background:
+    linear-gradient(125deg,rgba(255,255,255,.42),rgba(255,255,255,.04) 38%,rgba(207,192,229,.12) 76%,rgba(255,255,255,.25)),
+    var(--section-glass-fill);
+  -webkit-backdrop-filter:blur(var(--section-glass-blur)) saturate(135%);
+  backdrop-filter:blur(var(--section-glass-blur)) saturate(135%);
+  box-shadow:inset 1px 1px 1px rgba(255,255,255,.96),inset -1px -1px 1px rgba(123,102,150,.15);
+}
+.site-shell :is(.panel-section,.photo-section,.backstage-section,.about-section,.process-section,.contact-section)::after{
+  content:"";
+  position:absolute;inset:2px;z-index:-1;
+  border-radius:inherit;pointer-events:none;
+  background:radial-gradient(ellipse 60% 110px at 18% 0,rgba(255,255,255,.3),transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+}
+.site-shell .contact-section{--section-glass-fill:rgba(238,229,251,.42)}
+.site-shell .about-section>div>p:not(.eyebrow){color:#62556e}
+.site-shell :is(.panel-section,.photo-section,.backstage-section) .section-note{color:#675873}
+.site-shell .backstage-copy>p:not(.eyebrow),.site-shell .process-grid p{color:#675873}
+.site-shell .process-grid>div>span{color:#755990}
+.site-shell .process-grid>div{border-color:rgba(116,87,144,.25)}
 
 :where(.site-header,.hero-slider-controls,.hero-floating,.button,.circle-button,.hero-play,.card-play,.play-button,.project-filters a,.scroll-information,.quality-selector,.project-tabs,.admin-topbar){position:relative;isolation:isolate}
 :is(.site-header,.hero-slider-controls,.hero-floating,.button-light,.button-dark,.circle-button,.hero-play,.card-play,.play-button,.project-filters a,.scroll-information,.quality-selector,.project-tabs,.admin-topbar){
@@ -71,11 +121,13 @@
 
 @media(max-width:800px){
   :root{--glass-blur:12px;--glass-saturation:130%}
+  :root{--section-glass-blur:12px}
   .site-header{top:10px;border-radius:21px}
   .site-navigation{gap:4px}
   .site-navigation a{padding:6px 8px}
 }
 @media(max-width:650px){
+  .site-shell :is(.panel-section,.photo-section,.backstage-section,.about-section,.process-section,.contact-section){border-radius:23px;--section-glass-fill:rgba(253,251,255,.48)}
   .site-header{--glass-fill:rgba(248,246,253,.86);--glass-blur:12px}
   .site-navigation.is-open{background:linear-gradient(145deg,#fffffff5,#f2ebfcf0);border:1px solid #fff;border-radius:22px;box-shadow:0 16px 35px #543d6d26,inset 0 1px 0 #fff;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);padding:15px}
   .site-navigation.is-open a{padding:9px 12px}
@@ -83,12 +135,17 @@
   .project-tabs button{font-size:12px;padding:9px 14px}
 }
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .site-shell :is(.panel-section,.photo-section,.backstage-section,.about-section,.process-section,.contact-section)::before{background:#f7f3fc}
   :root{--glass-fill:#f7f3fc}
   :is(.site-header,.hero-slider-controls,.hero-floating,.button-light,.project-filters a,.project-tabs,.admin-topbar){background:#f7f3fc}
   :is(.circle-button,.hero-play,.card-play,.play-button,.scroll-information,.quality-selector){background:#3c2b4e}
   .button-dark,.project-filters a.is-active{background:#33263f;color:#fff}
 }
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+  body:has(>.site-shell){background:#eae9f1}
+  .site-shell :is(.panel-section,.photo-section,.backstage-section,.about-section,.process-section,.contact-section){border-color:#b2a0c1;box-shadow:none}
+  .site-shell :is(.panel-section,.photo-section,.backstage-section,.about-section,.process-section,.contact-section)::before{background:#f8f5fc;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+  .site-shell :is(.panel-section,.photo-section,.backstage-section,.about-section,.process-section,.contact-section)::after{display:none}
   :is(.site-header,.hero-slider-controls,.hero-floating,.button-light,.project-filters a,.project-tabs,.admin-topbar){background:#f8f5fc;border-color:#b2a0c1;color:#3c2d48;-webkit-backdrop-filter:none;backdrop-filter:none}
   :is(.button-dark,.circle-button,.hero-play,.card-play,.play-button,.scroll-information,.quality-selector,.project-filters a.is-active){background:#33263f;border-color:#d8c5e8;color:#fff;-webkit-backdrop-filter:none;backdrop-filter:none}
   .site-navigation.is-open{background:#f8f5fc;-webkit-backdrop-filter:none;backdrop-filter:none}
@@ -101,6 +158,11 @@
   .button:hover{transform:none}
 }
 @media(forced-colors:active){
+  body:has(>.site-shell){background:Canvas}
+  .site-shell :is(.panel-section,.photo-section,.backstage-section,.about-section,.process-section,.contact-section){background:Canvas;border-color:CanvasText;box-shadow:none}
+  .site-shell :is(.panel-section,.photo-section,.backstage-section,.about-section,.process-section,.contact-section)::before,.site-shell :is(.panel-section,.photo-section,.backstage-section,.about-section,.process-section,.contact-section)::after{display:none}
+  .site-shell .about-section>div>p:not(.eyebrow),.site-shell :is(.panel-section,.photo-section,.backstage-section) .section-note,.site-shell .backstage-copy>p:not(.eyebrow),.site-shell .process-grid p,.site-shell .process-grid>div>span{color:CanvasText}
+  .site-shell .process-grid>div{border-color:CanvasText}
   :is(.site-header,.hero-slider-controls,.hero-floating,.button,.circle-button,.hero-play,.card-play,.play-button,.project-filters a,.scroll-information,.quality-selector,.project-tabs,.admin-topbar){background:Canvas;border:1px solid ButtonText;color:CanvasText;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
   .site-header::before,.hero-slider-controls::before,.hero-floating::before,.button::before,.circle-button::before,.hero-frame::before{display:none}
 }

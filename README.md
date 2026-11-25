@@ -36,6 +36,8 @@ Khu vực video dùng [slider phối cảnh theo GIF](docs/film-slider.md): th�
 
 Từ 1200px, slider video hiển thị 5 thẻ (hai mỗi bên thẻ chính); màn nhỏ giữ 3 thẻ. Khi chưa đủ 5 video, các dự án có thật được lặp vòng; bộ đếm vẫn tính số dự án thực tế.
 
+`photo-grid` dùng [accordion ảnh theo video mẫu](docs/photo-accordion.md): dải ảnh hẹp mở rộng khi bấm, hiện thông tin và nút xem bộ ảnh. Có bàn phím và cuộn ngang trên mobile; dùng dữ liệu dự án thật.
+
 Admin có đăng nhập, bản nháp/preview riêng tư, tạo/sửa/sắp xếp media, cover/focal point/alt/caption, xuất bản/gỡ xuất bản, lưu trữ/khôi phục dự án, thư viện tái sử dụng, tiến độ/hủy/thử lại upload, thử lại xử lý lỗi, thùng rác media khôi phục 7 ngày, quản lý liên hệ và cài đặt website.
 
 ## Media và chất lượng
